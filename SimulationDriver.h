@@ -140,7 +140,7 @@ class ElasticityDriver: public SimulationDriver<T>{
 public:
   ElasticityDriver(const T final_time_input,const int frames_per_second_input,const T dt_input,const int N_input,const T a_input,const T dX_input,std::string& output_dir):
   SimulationDriver<T>(final_time_input,frames_per_second_input,dt_input,output_dir),N(N_input),a(a_input),dX(dX_input),
-  rho((T)1),k((T)1),x_n(N_input),x_np1(N_input),v_n(N_input),x_hat(N_input),residual(N_input),mass(N_input),delta(N_input),
+  rho((T)1),k((T)100),x_n(N_input),x_np1(N_input),v_n(N_input),x_hat(N_input),residual(N_input),mass(N_input),delta(N_input),
   Newton_tol((T)1e-5),max_newton_it(10),be_matrix(N){
     cons_model=new LinearElasticity<T>(k);
     lf=new FEMHyperelasticity<T>(a,dX,N,*cons_model);
@@ -170,12 +170,12 @@ public:
     x_np1=x_n;//initial guess
 
     for(int it=1;it<max_newton_it;it++){
-      residual=mass.asDiagonal()*(x_hat-x_np1); // computes M(x-xhat)
-      lf->AddForce(residual,x_np1,-dt*dt); // adds -dt^2*f (there's weird sign flipping going on here)
+      residual=mass.asDiagonal()*(x_hat-x_np1);
+      lf->AddForce(residual,x_np1,dt*dt);
       T norm=(T)0;for(int i=0;i<N;i++) norm+=residual(i)*residual(i)/mass(i);
       norm=sqrt(norm);
-      std::cout << "Residual = " << norm << std::endl;
-      be_matrix.SetToZero(); // compute g derivative
+      std::cout << "Newton residual at iteration " << it << " = " << norm << std::endl;
+      be_matrix.SetToZero();
       for(int i=0;i<N;i++) be_matrix(i,i)=mass(i);
       lf->AddForceDerivative(be_matrix,x_np1,-dt*dt);
       be_matrix.QRSolve(delta,residual); // solve the system and compute the residual
