@@ -154,7 +154,7 @@ public:
   void Initialize(){
     //set intiial positions and velocity
     for(int i=0;i<N;i++){
-      x_n(i)=(T).7*(a+(T)i*dX);
+      x_n(i)=(T).7*(a+(T)i*dX); // squishes by factor of .7
       v_n(i)=(T)0;
     }
     //intialize mass lumped mass matrix from density
@@ -170,19 +170,19 @@ public:
     x_np1=x_n;//initial guess
 
     for(int it=1;it<max_newton_it;it++){
-      residual=mass.asDiagonal()*(x_hat-x_np1);
-      lf->AddForce(residual,x_np1,-dt*dt);
+      residual=mass.asDiagonal()*(x_hat-x_np1); // computes M(x-xhat)
+      lf->AddForce(residual,x_np1,-dt*dt); // adds -dt^2*f (there's weird sign flipping going on here)
       T norm=(T)0;for(int i=0;i<N;i++) norm+=residual(i)*residual(i)/mass(i);
       norm=sqrt(norm);
       std::cout << "Residual = " << norm << std::endl;
-      be_matrix.SetToZero();
+      be_matrix.SetToZero(); // compute g derivative
       for(int i=0;i<N;i++) be_matrix(i,i)=mass(i);
       lf->AddForceDerivative(be_matrix,x_np1,-dt*dt);
-      be_matrix.QRSolve(delta,residual);
-      x_np1+=delta;
+      be_matrix.QRSolve(delta,residual); // solve the system and compute the residual
+      x_np1+=delta; // increment solution
     }
-    v_n=(T)1/dt*(x_np1-x_n);
-    x_n=x_np1;
+    v_n=(T)1/dt*(x_np1-x_n); // update velocity
+    x_n=x_np1; // update old positions
   }
 
   void Write_State(const int number,std::string& simulation_data_filename){
