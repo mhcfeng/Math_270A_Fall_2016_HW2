@@ -178,6 +178,10 @@ public:
       be_matrix.SetToZero();
       for(int i=0;i<N;i++) be_matrix(i,i)=mass(i);
       lf->AddForceDerivative(be_matrix,x_np1,-dt*dt);
+      be_matrix(0,1)=0; // the next three lines essentially ensure that we solve the QR while fixing the left endpoint
+      be_matrix(1,0)=0;
+      residual(0)=0;
+      residual(N-1)-=dt*dt*10; // applies force c to right end
       be_matrix.QRSolve(delta,residual); // solve the system and compute the residual
       x_np1+=delta; // increment solution
     }

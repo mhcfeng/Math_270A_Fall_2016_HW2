@@ -79,7 +79,7 @@ public:
   a(a_input),dX(dX_input),cons_model(cons_input){constrained_nodes.resize(0);}
 
   T F(const TVect& x,const int e)const{
-    return (x(e+1)-x(e))/dX;
+    return (x(e+1)-x(e))/dX; // UPDATE: might need to change this for e=0
   }
 
   T PotentialEnergy(const TVect& x){
